@@ -1,0 +1,8 @@
+{
+    "postgres":{
+        "host":"10.8.0.1",
+        "user":"postgres-user",
+	"pass":"password :)",
+        "db":"postgres-database"
+    }
+}
