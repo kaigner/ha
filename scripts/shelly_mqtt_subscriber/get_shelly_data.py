@@ -119,7 +119,7 @@ while True:
         act_checksum = spma.genChecksum()
         # print("act: {} prev {}".format(act_checksum, prev_Checksum))
         if prev_Checksum != act_checksum:
-             spma.addDataToDB()
+            spma.addDataToDB()
             prev_Checksum = spma.genPreviewsChecksum()
         else:
             pass
