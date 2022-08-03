@@ -43,7 +43,7 @@ class ShellyDataset:
 
     def addDataToDB(self):
         sql = "INSERT INTO common_data (device, type, event, reading, json_data, unit) VALUES (%s, %s, %s, %s, %s, %s)"
-        cursor.execute(sql,(dev, dev_type, "update", "data", str(self.data), "json" ))
+        cursor.execute(sql,(dev, dev_type, "update", "data", json.dumps(self.data), "json" ))
         db.commit()
 
 def on_energy(client, userdata, message):
