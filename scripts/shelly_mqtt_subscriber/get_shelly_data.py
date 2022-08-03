@@ -5,15 +5,16 @@ from datetime import datetime
 import paho.mqtt.client as mqtt
 import json
 import os
-import pprint
+# import pprint
 import sys
-
-dataset = {'energy': None, 'power': None, 'temp': None, 'relay': None}
+import pymysql
+import hashlib
 
 
 class ShellyDataset:
     def __init__(self):
         self.data = {'energy': None, 'power': None, 'temp': None, 'relay': None}
+        self.prev_Checksum = 0
 
     def checkDataset(self):
         # print("Prüfung der Werte")
@@ -33,7 +34,17 @@ class ShellyDataset:
 
     def resetData(self):
         self.__init__()
-        print(self.__dict__)
+
+    def genChecksum(self):
+        return hashlib.md5(str(self.__dict__).encode('utf-8')).hexdigest()
+
+    def genPreviewsChecksum(self):
+        return hashlib.md5(str(self.__dict__).encode('utf-8')).hexdigest()
+
+    def addDataToDB(self):
+        sql = "INSERT INTO common_data (device, type, event, reading, json_data, unit) VALUES (%s, %s, %s, %s, %s, %s)"
+        cursor.execute(sql,(dev, dev_type, "update", "data", str(self.data), "json" ))
+        db.commit()
 
 def on_energy(client, userdata, message):
     msg = message.payload.decode("utf-8")
@@ -59,11 +70,34 @@ def on_relay(client, userdata, message):
     # print ("relay Message received: "  + str(m_decode))
 
 os.chdir(os.path.dirname(__file__))
-with open(os.getcwd() + "/config.json") as json_config_file:
-    config_data = json.load(json_config_file)
-mqtt_host = config_data['mqtt']['host']
-mqtt_user = config_data['mqtt']['user']
-mqtt_pass = config_data['mqtt']['pass']
+
+try:
+    with open(os.getcwd() + "/config.json") as json_config_file:
+        config_data = json.load(json_config_file)
+except FileNotFoundError as error:
+    print("- config file not found, exit: {}".format(error))
+    sys.exit(1)
+
+try:
+    mqtt_host = config_data['mqtt']['host']
+    mqtt_user = config_data['mqtt']['user']
+    mqtt_pass = config_data['mqtt']['pass']
+    db_host = config_data['database']['db_host']
+    db_name = config_data['database']['db_name']
+    db_user = config_data['database']['db_user']
+    db_pass = config_data['database']['db_pass']
+    dev = config_data['device']['dev']
+    dev_type = config_data['device']['dev_type']
+except KeyError as error:
+    print("- value mapping from config not ok: {}".format(error))
+    sys.exit(1)
+
+try:
+    db = pymysql.connect(host=db_host, user=db_user, password=db_pass, database=db_name)
+except pymysql.err.OperationalError as error:
+    print("- error connecting to database: {}".format(error))
+    sys.exit(1)
+cursor = db.cursor()
 
 broker_address = mqtt_host
 mqtt_client = mqtt.Client("backend.shemhazai.de")
@@ -76,11 +110,19 @@ mqtt_client.message_callback_add('shellies/spuelmaschine/temperature', on_temper
 mqtt_client.message_callback_add('shellies/spuelmaschine/relay/0', on_relay)
 
 spma = ShellyDataset()
+prev_Checksum = 0
 while True:
     mqtt_client.loop_start()
     time.sleep(0.1)
+
     if spma.checkDataset() == True:
-        print("Schreibe in DB: {}".format(spma.__dict__))
+        act_checksum = spma.genChecksum()
+        # print("act: {} prev {}".format(act_checksum, prev_Checksum))
+        if prev_Checksum != act_checksum:
+             spma.addDataToDB()
+            prev_Checksum = spma.genPreviewsChecksum()
+        else:
+            pass
         spma.resetData()
 
     mqtt_client.loop_stop()
