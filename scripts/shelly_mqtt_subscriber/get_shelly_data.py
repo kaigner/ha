@@ -36,6 +36,7 @@ class ShellyDataset:
         self.__init__()
 
     def genChecksum(self):
+        self.data['temp']=round(self.data['temp'],1)
         return hashlib.md5(str(self.__dict__).encode('utf-8')).hexdigest()
 
     def genPreviewsChecksum(self):
