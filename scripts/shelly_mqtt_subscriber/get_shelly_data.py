@@ -43,6 +43,10 @@ class ShellyDataset:
         return hashlib.md5(str(self.__dict__).encode('utf-8')).hexdigest()
 
     def addDataToDB(self):
+        if (db):
+            print("Datenbankverbindung OK")
+        else:
+            print("Datenbankversbingung FEHLER")
         sql = "INSERT INTO common_data (device, type, event, reading, json_data, unit) VALUES (%s, %s, %s, %s, %s, %s)"
         cursor.execute(sql,(dev, dev_type, "update", "data", json.dumps(self.data), "json" ))
         db.commit()
