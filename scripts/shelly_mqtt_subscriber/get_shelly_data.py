@@ -51,6 +51,7 @@ class ShellyDataset:
                 ( self.data['power'] is not None ) and \
                 ( self.data['temp'] is not None ) and \
                 ( self.data['relay'] is not None ):
+            logger.info("full set")
             return True
         else:
             return False
@@ -62,10 +63,12 @@ class ShellyDataset:
         spma.data['relay'] = "relay"
 
     def resetData(self):
+        logger.info("reset Data")
         self.__init__()
 
     def genChecksum(self):
-        self.data['temp']=round(self.data['temp'],1)
+        self.data['temp']=round(self.data['temp'],0)
+        # print("Temp: {}".format(str(self.data['temp'])))
         return hashlib.md5(str(self.__dict__).encode('utf-8')).hexdigest()
 
     def genPreviewsChecksum(self):
@@ -81,26 +84,32 @@ class ShellyDataset:
         sql = "INSERT INTO common_data (device, type, event, reading, json_data, unit) VALUES (%s, %s, %s, %s, %s, %s)"
         cursor.execute(sql,(dev, dev_type, "update", "data", json.dumps(self.data), "json" ))
         db.commit()
+        logger.info("db INSERT\n====================")
 
 def on_energy(client, userdata, message):
+    logger.info("on_energy")
     msg = message.payload.decode("utf-8")
     m_decode = json.loads(msg)
+    m_decode = round(m_decode / 60 / 1000,5)
     spma.data['energy'] = m_decode
     # print ("energy Message received: "  + str(m_decode))
 
 def on_power(client, userdata, message):
+    logger.info("on_power")
     msg = message.payload.decode("utf-8")
     m_decode = json.loads(msg)
     spma.data['power'] = m_decode
     # print ("power Message received: "  + str(m_decode))
 
 def on_temperature(client, userdata, message):
+    logger.info("on_temp")
     msg = message.payload.decode("utf-8")
     m_decode = json.loads(msg)
     spma.data['temp'] = m_decode
     # print ("temperature Message received: "  + str(m_decode))
 
 def on_relay(client, userdata, message):
+    logger.info("on_relay")
     msg = message.payload.decode("utf-8")
     spma.data['relay'] = str(msg)
     # print ("relay Message received: "  + str(m_decode))
