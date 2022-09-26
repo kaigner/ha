@@ -75,6 +75,12 @@ class ShellyDataset:
         return hashlib.md5(str(self.__dict__).encode('utf-8')).hexdigest()
 
     def addDataToDB(self):
+        try:
+            db = pymysql.connect(host=db_host, user=db_user, password=db_pass, database=db_name)
+        except pymysql.err.OperationalError as error:
+            print("- error connecting to database: {}".format(error))
+            sys.exit(1)
+        cursor = db.cursor()
         if (db):
             logger.info("Datenbankverbindung OK")
         else:
@@ -84,6 +90,7 @@ class ShellyDataset:
         sql = "INSERT INTO common_data (device, type, event, reading, json_data, unit) VALUES (%s, %s, %s, %s, %s, %s)"
         cursor.execute(sql,(dev, dev_type, "update", "data", json.dumps(self.data), "json" ))
         db.commit()
+        db.close()
         logger.info("db INSERT\n====================")
 
 def on_energy(client, userdata, message):
@@ -159,12 +166,6 @@ except KeyError as error:
     print("- value mapping from config not ok: {}".format(error))
     sys.exit(1)
 
-try:
-    db = pymysql.connect(host=db_host, user=db_user, password=db_pass, database=db_name)
-except pymysql.err.OperationalError as error:
-    print("- error connecting to database: {}".format(error))
-    sys.exit(1)
-cursor = db.cursor()
 
 broker_address = mqtt_host
 mqtt_client = mqtt.Client("backend.shemhazai.de")
