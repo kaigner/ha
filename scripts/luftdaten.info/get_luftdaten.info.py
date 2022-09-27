@@ -72,7 +72,7 @@ cursor = db.cursor()
     # sys.exit(0)
 
 cursor = db.cursor()
-sql = "INSERT INTO feinstaub_daten (device, alias, vendor, sensors, location, pm10, pm2_5, temp, humidity, airpressure, sig, json_data) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-cursor.execute(sql, (device, alias, vendor, str(sensors), place, float(pm10), float(pm25), float(temp), float(humidity), float(hpa), int(signal), json.dumps(json_values)))
+sql = "INSERT INTO feinstaub_daten (timestamp, device, alias, vendor, sensors, location, pm10, pm2_5, temp, humidity, airpressure, sig, json_data) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+cursor.execute(sql, (dt, device, alias, vendor, str(sensors), place, float(pm10), float(pm25), float(temp), float(humidity), float(hpa), int(signal), json.dumps(json_values)))
 db.commit()
 db.close()
