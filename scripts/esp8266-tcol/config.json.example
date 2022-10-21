@@ -1,0 +1,15 @@
+{
+    "postgres":{
+        "host":"10.281.0.1",
+        "user":"postgres",
+	"pass":"password",
+        "db":"sive"
+    },
+    "mysql":{
+        "host":"10.0.0.1",
+        "user":"root,
+	"pass":"toor",
+        "db":"nene ;)"
+    }
+	
+}
