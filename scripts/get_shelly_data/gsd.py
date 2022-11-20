@@ -64,8 +64,9 @@ if __name__ == "__main__":
             ipaddr    = key
             aliasname = value
             json_data = get_status_in_json(ipaddr)
-            parse_json_and_do_the_rest_because_i_have_no_class(json_data)
-            insert_json_data_to_database(json_data, aliasname)
+            if json_data is not None:
+                parse_json_and_do_the_rest_because_i_have_no_class(json_data)
+                insert_json_data_to_database(json_data, aliasname)
             json_data = {}
         time.sleep(60)
 
