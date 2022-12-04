@@ -49,7 +49,7 @@ def insert_json_data_to_database(json_data, aliasname):
         cursor.close
     except pymysql.err.OperationalError as error:
         print("- error connecting to database: {}".format(error))
-        sys.exit(1)
+        # sys.exit(1)
 
 
 def parse_json_and_do_the_rest_because_i_have_no_class(json_data):
