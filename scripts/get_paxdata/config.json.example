@@ -1,0 +1,15 @@
+{
+    "ttn_auth":{
+        "user":"ttn user",
+        "pass":"password"
+    },
+    "mysql":{
+        "host":"333.444.555.666",
+        "user":"superuser",
+	    "pass":"megapasswort",
+        "db":"wogleichnochmal"
+    },
+    "prometheus":{
+	    "port": 9190
+    }
+}
