@@ -1,3 +1,4 @@
 *.idea
 *.swp
 config.json
+scripts/get_shelly_data/gsd-prom.py
