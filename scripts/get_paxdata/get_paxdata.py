@@ -28,13 +28,14 @@ def addDataToDB(wifi, ble, gwname, gweui, freq, freqts, location):
 		db = pymysql.connect(host=db_host, user=db_user, password=db_pass, database=db_name)
 	except pymysql.err.OperationalError as error:
 		print("- error connecting to database: {}".format(error))
-		sys.exit(1)
+		pass
+	
 	cursor = db.cursor()
 	if (db):
 		print("Datenbankverbindung OK")
 	else:
-		sys.exit(0)
-
+		pass
+	
 	dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	sql = "INSERT INTO paxdata (wifi, ble, gwname, gweui, freq, dt, location) VALUES (%s, %s, %s, %s, %s, %s, %s)"
 	cursor.execute(sql,(wifi, ble, gwname, gweui, freq, dt, location))
