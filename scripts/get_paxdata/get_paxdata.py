@@ -32,7 +32,7 @@ def addDataToDB(wifi, ble, gwname, gweui, freq, freqts, location):
 	
 	cursor = db.cursor()
 	if (db):
-		print("Datenbankverbindung OK")
+		pass #print("Datenbankverbindung OK")
 	else:
 		pass
 	
