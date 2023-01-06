@@ -41,11 +41,45 @@ else:
 # sql = "INSERT INTO paxdata (wifi, ble, gwname, gweui, freq, dt, location) VALUES (%s, %s, %s, %s, %s, %s, %s)"
 # cursor.execute(sql,(wifi, ble, gwname, gweui, freq, dt, location))
 
+class newStore():
+	def __init__(self):
+		self.store = { "name":None, "alias":None, "street":None, "housenumber":None, "zip":None, "town":None, "state":None, "country":None}
+
+	def askforData(self):
+		console.clear() 		
+		self.store['name']        = input("Name des Geschäfts: ").strip()
+		self.store['alias']       = input("Aliasname         : ").strip()
+		self.store['street']      = input("Strasse           : ").strip()
+		self.store['housenumber'] = input("Hausnummer        : ").strip()
+		self.store['zip']         = input("PLZ               : ").strip()
+		self.store['town']        = input("Stadt             : ").strip()
+		self.store['state']       = input("State/Bezirk      : ").strip()
+		self.store['country']     = input("Land              : ").strip()
+		print("\n")
+		while True:
+			x = input("Daten Ok(ja/nein)?: ").strip()
+			if x == "ja":
+				return "yes"
+			elif x == "nein":
+				return "rerun"
+			else:
+				print('Bitte "ja" oder "nein" eingeben, Danke! :)', ":nerd_face:")
+
+	def addtoDB(self):
+		print("Add Store to DB")
+		dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+		sql = "INSERT INTO store (name, alias, street, housenumber, zip, town, state, country, created) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+		cursor.execute(sql,(self.store["name"], self.store["alias"], self.store["street"], self.store["housenumber"], self.store["zip"], self.store["town"], self.store["state"], self.store["country"], dt))
+		db.commit()
+		xxxx = input("add to db done ")
+
+
+
 
 def hhbook_exit():
 	db.close()
 	sys.exit(1)
-
 
 
 def list_stores():
@@ -53,11 +87,19 @@ def list_stores():
 
 def add_newstore():
 	print("add_newstore")
+	ns = newStore()
+	rc = ns.askforData()
+	if rc == "rerun":
+		add_newstore()
+	elif rc == "yes":
+		print("add to db")
+		ns.addtoDB()
 
+	
 if __name__ == "__main__":
 	console = Console()
 	while True:
-		console.clear()		
+		console.clear() 
 		print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
 		print("\n\n")
 		print("neuer einkauf")
@@ -73,8 +115,9 @@ if __name__ == "__main__":
 
 		if x == "x":
 			hhbook_exit()
-		elif x == 1:
+		elif x == "1":
 			add_newstore()
 		else:
 			pass
-	
+		x = input("neuer lauf")
+
