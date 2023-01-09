@@ -38,23 +38,20 @@ if (db):
 else:
 	pass
 
-# sql = "INSERT INTO paxdata (wifi, ble, gwname, gweui, freq, dt, location) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-# cursor.execute(sql,(wifi, ble, gwname, gweui, freq, dt, location))
-
-class newStore():
+class Store():
 	def __init__(self):
 		self.store = { "name":None, "alias":None, "street":None, "housenumber":None, "zip":None, "town":None, "state":None, "country":None}
 
 	def askforData(self):
-		console.clear() 		
-		self.store['name']        = input("Name des Geschäfts: ").strip()
-		self.store['alias']       = input("Aliasname         : ").strip()
-		self.store['street']      = input("Strasse           : ").strip()
+		console.clear() 
+		self.store['name'] = input("Name des Geschäfts: ").strip()
+		self.store['alias'] = input("Aliasname         : ").strip()
+		self.store['street'] = input("Strasse           : ").strip()
 		self.store['housenumber'] = input("Hausnummer        : ").strip()
-		self.store['zip']         = input("PLZ               : ").strip()
-		self.store['town']        = input("Stadt             : ").strip()
-		self.store['state']       = input("State/Bezirk      : ").strip()
-		self.store['country']     = input("Land              : ").strip()
+		self.store['zip'] = input("PLZ               : ").strip()
+		self.store['town'] = input("Stadt             : ").strip()
+		self.store['state'] = input("State/Bezirk      : ").strip()
+		self.store['country'] = input("Land              : ").strip()
 		print("\n")
 		while True:
 			x = input("Daten Ok(ja/nein)?: ").strip()
@@ -72,8 +69,22 @@ class newStore():
 		sql = "INSERT INTO store (name, alias, street, housenumber, zip, town, state, country, created) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
 		cursor.execute(sql,(self.store["name"], self.store["alias"], self.store["street"], self.store["housenumber"], self.store["zip"], self.store["town"], self.store["state"], self.store["country"], dt))
 		db.commit()
-		xxxx = input("add to db done ")
+		cursor.close
+		print("\n\n[italic green]Geschädt angelegt[/italic green]")
 
+
+	def list(self):
+		print("List Stores")
+		try:
+			with db.cursor() as cur:
+				cur.execute("SELECT id, name, alias, street, housenumber,zip FROM store")
+				rows = cur.fetchall()
+
+				for row in rows:
+					print(row)
+		finally:
+			cur.close()
+		x = input("bremse")
 
 
 
@@ -84,10 +95,12 @@ def hhbook_exit():
 
 def list_stores():
 	print("list_stores")
+	ls = Store()
+	ls.list()
 
 def add_newstore():
 	print("add_newstore")
-	ns = newStore()
+	ns = Store()
 	rc = ns.askforData()
 	if rc == "rerun":
 		add_newstore()
@@ -95,7 +108,7 @@ def add_newstore():
 		print("add to db")
 		ns.addtoDB()
 
-	
+
 if __name__ == "__main__":
 	console = Console()
 	while True:
@@ -106,6 +119,7 @@ if __name__ == "__main__":
 		print("einlauf anzeigen")
 		print("\n\n\n")
 		print("1, neues Geschäft anlegen")
+		print("2, Geschäfte anzeigel")
 		print("\n\n")
 		print("x, Beenden")
 
@@ -117,6 +131,8 @@ if __name__ == "__main__":
 			hhbook_exit()
 		elif x == "1":
 			add_newstore()
+		elif x == "2":
+			list_stores()
 		else:
 			pass
 		x = input("neuer lauf")
