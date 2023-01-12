@@ -72,31 +72,82 @@ class Store():
 		cursor.close
 		print("\n\n[italic green]Geschädt angelegt[/italic green]")
 
-
-	def list(self):
-		print("List Stores")
+	def list(self, ask, id):
 		try:
 			with db.cursor() as cur:
-				cur.execute("SELECT id, name, alias, street, housenumber,zip FROM store")
-				rows = cur.fetchall()
+				if id == 0:
+					cur.execute("SELECT id, name, alias, street, housenumber,zip FROM store")
+					rows = cur.fetchall()
+				else:
+					cur.execute("SELECT id, name, alias, street, housenumber,zip FROM store where id = %s", (id,))
+					rows = cur.fetchall()
 
+				for row in rows:
+					print(row)	
+		finally:
+			cur.close()
+		
+		if ask == "yes":
+			x = input("Enter für weiter")
+
+	def choise(self):
+		print("")
+		x = input("Geschäft wählen: ")
+		return x
+
+
+class Ledger():
+	def __init__(self):
+		self.account = { "name":None, "iban":None }
+	
+	def list(self, ask):
+		try:
+			with db.cursor() as cur:
+				cur.execute("SELECT id, name, comment FROM ledger")
+				rows = cur.fetchall()
 				for row in rows:
 					print(row)
 		finally:
 			cur.close()
-		x = input("bremse")
+		if ask == "y":
+			x = input("Enter für weiter")
+
+	def list(self, ask, id):
+			try:
+				with db.cursor() as cur:
+					if id == 0:
+						cur.execute("SELECT id, name, comment, iban FROM ledger")
+						rows = cur.fetchall()
+					else:
+						cur.execute("SELECT id, name, comment, iban FROM ledger where id = %s", (id,))
+						rows = cur.fetchall()
+			
+					for row in rows:
+						print(row)	
+			finally:
+				cur.close()
+			
+			if ask == "yes":
+				x = input("Enter für weiter")
 
 
+	def choose(self):
+		print("")
+		x = input("konto wählen: ")
+		return x
+
+# Klassen ENDE
 
 def hhbook_exit():
 	db.close()
 	sys.exit(1)
-
+ 
 
 def list_stores():
 	print("list_stores")
 	ls = Store()
-	ls.list()
+	ls.list("yes",0)
+
 
 def add_newstore():
 	print("add_newstore")
@@ -108,6 +159,94 @@ def add_newstore():
 		print("add to db")
 		ns.addtoDB()
 
+def searchArticel(name, store):
+	print("searchArticel")
+	try:
+		with db.cursor() as cur:
+			cur.execute("select id, item, price from purchase where item like %s", (name,))
+			rows = cur.fetchall()
+			if len(rows) == 0:
+				print("Keine bisherigen Einträge gefunden, Artikel wird neu eingetragen")
+				while True:
+					print("Stück", end="")
+					stueck = input(": ")
+					print("Kosten pro Stueck", end="")
+					kprostueck = input(": ").replace(",",".")
+					if kprostueck != "":
+						price = float(kprostueck) * float(stueck)
+						print("Kostet: {}".format(str(price)))
+					else:
+						print("Kostet", end="")
+						price = input(": ")
+					
+					print("Menge (Inhalt)", end="")
+					menge = input(": ")
+					print("Einheit", end="")
+					einheit = input(": ")
+					print("Kategorie", end="")
+					category = input(": ")
+
+					break
+			else:
+				print("such ergebniss:")
+				for row in rows:
+					print(row)
+	finally:
+		cur.close()
+
+
+
+
+
+
+def add_purchase():
+	print("add purchase")
+	nl = Ledger()
+	ns = Store()
+	dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	nl.list("n",0)
+	ledger = nl.choose()
+	print("Konto Nr: {}".format(ledger))
+
+	ns.list("n", 0)
+	store = ns.choise()
+	print("Store: {}".format(store))
+	console.clear()
+	print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
+	print("\n\n")
+	print("Ausgewähltes Konto: ")
+	nl.list("no", ledger)
+	# print("\n")
+	print("Ausgewählter Laden:")
+	ns.list("no", store)
+	print("Einkaufsdatum ({})".format(dt), end="")
+	pruchasedate = input(": ").strip()
+	if pruchasedate == "":
+		pruchasedate = dt
+	# Prüfung ob es ein Dagum ist das in die Datenbank passt
+	print("Dateiname des Belegs", end="")
+	scanname = input(": ")
+	print("artikel eingeben (ende als Artikelname für Eingabeende")
+	while True:
+		name = input("Artikel: ")
+		if name == "ende":
+			break
+		searchArticel(name, store)
+
+
+	
+	
+
+
+
+
+
+	
+
+	
+
+	x = input("Einkauf Ende")
+
 
 if __name__ == "__main__":
 	console = Console()
@@ -115,11 +254,14 @@ if __name__ == "__main__":
 		console.clear() 
 		print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
 		print("\n\n")
-		print("neuer einkauf")
+		print("[blue][bold]n[/bold], neuer Einkauf[/blue]")
 		print("einlauf anzeigen")
 		print("\n\n\n")
 		print("1, neues Geschäft anlegen")
-		print("2, Geschäfte anzeigel")
+		print("2, Geschäfte anzeigen")
+		print("\n----------------------\n")
+		print("3, neues Konto anlegen")
+		print("4, Konten auflisten")
 		print("\n\n")
 		print("x, Beenden")
 
@@ -129,11 +271,13 @@ if __name__ == "__main__":
 
 		if x == "x":
 			hhbook_exit()
+		elif x == "n":
+			add_purchase()
 		elif x == "1":
 			add_newstore()
 		elif x == "2":
 			list_stores()
 		else:
 			pass
-		x = input("neuer lauf")
+		# x = input("neuer lauf")
 
