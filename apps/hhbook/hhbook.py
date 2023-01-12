@@ -136,7 +136,29 @@ class Ledger():
 		x = input("konto wählen: ")
 		return x
 
+
+class Categorys():
+	def __init__(self):
+		self.category = {}
+	
+	def read(self):
+		try:
+			with db.cursor() as cur:
+				cur.execute("select id, name from categorys")
+				rows = cur.fetchall()
+				for id, name in rows:
+					self.category[id]=name
+		finally:
+			cur.close()
+		
+	def list(self):
+		for id, name in self.category.items():
+			print("Id: {}  Name: {}".format(id, name))
+
+
 # Klassen ENDE
+
+
 
 def hhbook_exit():
 	db.close()
@@ -250,6 +272,12 @@ def add_purchase():
 
 if __name__ == "__main__":
 	console = Console()
+	cat = Categorys()
+	cat.read()
+	cat.list()
+
+
+	sys.exit(9)
 	while True:
 		console.clear() 
 		print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
