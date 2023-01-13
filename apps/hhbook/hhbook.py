@@ -156,6 +156,23 @@ class Categorys():
 			print("Id: {}  Name: {}".format(id, name))
 
 
+class Quantitiys():
+	def __init__(self):
+		self.quantity = {}
+	
+	def read(self):
+		try:
+			with db.cursor() as cur:
+				cur.execute("select id, name from quantitys")
+				rows = cur.fetchall()
+				for id, name in rows:
+					self.quantity[id]=name
+		finally:
+			cur.close()
+		
+	def list(self):
+		for id, name in self.quantity.items():
+			print("Id: {}  Name: {}".format(id, name))
 # Klassen ENDE
 
 
@@ -203,11 +220,13 @@ def searchArticel(name, store):
 					
 					print("Menge (Inhalt)   ", end="")
 					menge = input(": ")
+					quant.list()
 					print("Mengen-Einheit   ", end="")
-					einheit = input(": ")
+					mengeneinheit = input(": ")
 					cat.list()
 					print("Kategorie        ", end="")
-					category = input(": ")
+					kategorie = input(": ")
+					addPurchaseToDB(store, name, stueck, kprostueck, price, menge, mengeneinheit, kategorie)
 
 					break
 			else:
@@ -219,6 +238,8 @@ def searchArticel(name, store):
 
 
 
+def addPurchaseToDB(store, name, stueck, kprostueck, price, menge, mengeneinheit, kategorie):
+	print("Adde")
 
 
 
@@ -274,7 +295,10 @@ def add_purchase():
 if __name__ == "__main__":
 	console = Console()
 	cat = Categorys()
+	quant = Quantitiys()
 	cat.read()
+	quant.read()
+	
 
 	while True:
 		console.clear() 
