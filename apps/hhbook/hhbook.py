@@ -203,8 +203,9 @@ def searchArticel(name, store):
 					
 					print("Menge (Inhalt)", end="")
 					menge = input(": ")
-					print("Einheit", end="")
+					print("Mengen-Einheit", end="")
 					einheit = input(": ")
+					cat.list()
 					print("Kategorie", end="")
 					category = input(": ")
 
@@ -274,10 +275,7 @@ if __name__ == "__main__":
 	console = Console()
 	cat = Categorys()
 	cat.read()
-	cat.list()
 
-
-	sys.exit(9)
 	while True:
 		console.clear() 
 		print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
