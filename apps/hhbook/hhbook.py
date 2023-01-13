@@ -190,23 +190,23 @@ def searchArticel(name, store):
 			if len(rows) == 0:
 				print("Keine bisherigen Einträge gefunden, Artikel wird neu eingetragen")
 				while True:
-					print("Stück", end="")
+					print("Stück            ", end="")
 					stueck = input(": ")
 					print("Kosten pro Stueck", end="")
 					kprostueck = input(": ").replace(",",".")
 					if kprostueck != "":
 						price = float(kprostueck) * float(stueck)
-						print("Kostet: {}".format(str(price)))
+						print("Kostet       : {}".format(str(price)))
 					else:
-						print("Kostet", end="")
+						print("Kostet       ", end="")
 						price = input(": ")
 					
-					print("Menge (Inhalt)", end="")
+					print("Menge (Inhalt)   ", end="")
 					menge = input(": ")
-					print("Mengen-Einheit", end="")
+					print("Mengen-Einheit   ", end="")
 					einheit = input(": ")
 					cat.list()
-					print("Kategorie", end="")
+					print("Kategorie        ", end="")
 					category = input(": ")
 
 					break
