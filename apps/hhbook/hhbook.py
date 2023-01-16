@@ -38,6 +38,15 @@ if (db):
 else:
 	pass
 
+# Klassen Start
+
+class Purchase():
+	def __init__(self):
+		self.ledger = None
+		self.store = None
+		self.date = None
+		self.referencename = None
+
 class Store():
 	def __init__(self):
 		self.store = { "name":None, "alias":None, "street":None, "housenumber":None, "zip":None, "town":None, "state":None, "country":None}
@@ -176,7 +185,6 @@ class Quantitiys():
 # Klassen ENDE
 
 
-
 def hhbook_exit():
 	db.close()
 	sys.exit(1)
@@ -198,62 +206,151 @@ def add_newstore():
 		print("add to db")
 		ns.addtoDB()
 
-def searchArticel(name, store):
+def addItemtoDB(name, store, ledger, pruchasedate, scanname):
+	print("Name: {}".format(name))
+	print("EAN", end="")
+	ean = input(": ").strip()
+	print("Hersteller", end="")
+	manufactor = input(": ").strip()
+	print("Verpackung", end="")
+	packaging = input(": ").strip()
+	print("Verpackungseinheit", end="")
+	quant.list()
+	packagingunit = input(": ")
+	try:
+		with db.cursor() as cur:
+			sql = "INSERT INTO item (name, ean, vendor, packing, packagingunit) VALUES (%s, %s, %s, %s, %s)"
+			cur.execute(sql,(name, ean, manufactor, packaging, packagingunit ))
+			db.commit()
+
+	finally:
+		cur.close()
+	searchArticel(name , store, ledger, pruchasedate, scanname)
+
+
+
+def searchArticel(name, store, ledger, pruchasedate, scanname):
 	print("searchArticel")
 	try:
 		with db.cursor() as cur:
+			# Suche in Einkäufen in dem Geschäft
+			storeproductmatch = False
+			itemmatch = False
 			cur.execute("select id, item, price from purchase where item like %s", (name,))
 			rows = cur.fetchall()
+			storeproductmatch = True
+			if len(rows) == 0:
+				# suche in der Artikeltabelle (item)
+				cur.execute("SELECT id, name, vendor, packing FROM item WHERE name LIKE %s", (name))
+				rows = cur.fetchall()
+				itemmatch = True
+
 			if len(rows) == 0:
 				print("Keine bisherigen Einträge gefunden, Artikel wird neu eingetragen")
-				while True:
-					print("Stück            ", end="")
-					stueck = input(": ")
-					print("Kosten pro Stueck", end="")
-					kprostueck = input(": ").replace(",",".")
-					if kprostueck != "":
-						price = float(kprostueck) * float(stueck)
-						print("Kostet       : {}".format(str(price)))
-					else:
-						print("Kostet       ", end="")
-						price = input(": ")
-					
-					print("Menge (Inhalt)   ", end="")
-					menge = input(": ")
-					quant.list()
-					print("Mengen-Einheit   ", end="")
-					mengeneinheit = input(": ")
-					cat.list()
-					print("Kategorie        ", end="")
-					kategorie = input(": ")
-					addPurchaseToDB(store, name, stueck, kprostueck, price, menge, mengeneinheit, kategorie)
+				addItemtoDB(name, store, ledger, pruchasedate, scanname)
 
-					break
+
+
+
+				# while True:
+				# 	print("Stück            ", end="")
+				# 	stueck = input(": ")
+				# 	print("Kosten pro Stueck", end="")
+				# 	kprostueck = input(": ").replace(",",".")
+				# 	if kprostueck != "":
+				# 		price = float(kprostueck) * float(stueck)
+				# 		print("Kostet       : {}".format(str(price)))
+				# 	else:
+				# 		print("Kostet       ", end="")
+				# 		price = input(": ")
+					
+				# 	print("Menge (Inhalt)   ", end="")
+				# 	menge = input(": ")
+				# 	quant.list()
+				# 	print("Mengen-Einheit   ", end="")
+				# 	mengeneinheit = input(": ")
+				# 	cat.list()
+				# 	print("Kategorie        ", end="")
+				# 	kategorie = input(": ")
+				# 	addPurchaseToDB(pruchasedate, scanname, store, ledger, name, stueck, kprostueck, price, menge, mengeneinheit, kategorie)
+
+					#break
 			else:
 				print("such ergebniss:")
+				if itemmatch:
+					print("Gefunden aber nicht in dem Laden")
+				elif storeproductmatch:
+					print("schon mal gekauft hier")
 				for row in rows:
 					print(row)
+
+				print("Artikel", end="")
+				item = input(": ")
+				print("Stück            ", end="")
+				stueck = input(": ")
+				
+				print("Kosten pro Stueck", end="")
+				kprostueck = input(": ").replace(",",".")
+				if kprostueck != "":
+					price = float(kprostueck) * float(stueck)
+					print("Kostet       : {}".format(str(price)))
+				else:
+					print("Kostet       ", end="")
+					price = input(": ")
+				
+				print("Menge (Inhalt)   ", end="")
+				menge = input(": ")
+				quant.list()
+				print("Mengen-Einheit   ", end="")
+				mengeneinheit = input(": ")
+				cat.list()
+				print("Kategorie        ", end="")
+				kategorie = input(": ")
+
+				print("ledger {} store {} date {} name {}".format(purchase.ledger, purchase.store, purchase.date, purchase.referencename))
+				addPurchaseToDB(purchase.date, purchase.referencename, purchase.store, purchase.ledger, item, stueck, kprostueck, price, menge, mengeneinheit, kategorie) # 11
+
+
+
+				# Neustart mit dem Ergebnis
+				sys.exit(1)
 	finally:
 		cur.close()
 
 
 
-def addPurchaseToDB(store, name, stueck, kprostueck, price, menge, mengeneinheit, kategorie):
-	print("Adde")
+def addPurchaseToDB(pruchasedate, scanname, store, ledger, name, stueck, kprostueck, price, menge, mengeneinheit, kategorie):
+	try:
+		with db.cursor() as cur:
+			sql = "INSERT INTO purchase (timestamp, receipt, store, ledger, name, quantity, quantityprice, price, unitofquantityprice, category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+			cursor.execute(sql, \
+				( \
+					pruchasedate, \
+					scanname, \
+					store, \
+					ledger, \
+					name, \
+					stueck, \
+					kprostueck, \
+					price, \
+					mengeneinheit,\
+					kategorie \
+					))
+			db.commit()
+	finally:
+		cur.close()
 
 
 
 def add_purchase():
-	print("add purchase")
-	nl = Ledger()
-	ns = Store()
 	dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	nl.list("n",0)
 	ledger = nl.choose()
+	purchase.ledger = ledger
 	print("Konto Nr: {}".format(ledger))
-
 	ns.list("n", 0)
 	store = ns.choise()
+	purchase.store = store
 	print("Store: {}".format(store))
 	console.clear()
 	print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
@@ -268,24 +365,17 @@ def add_purchase():
 	if pruchasedate == "":
 		pruchasedate = dt
 	# Prüfung ob es ein Dagum ist das in die Datenbank passt
+	purchase.date = dt
 	print("Dateiname des Belegs", end="")
 	scanname = input(": ")
+	purchase.referencename = scanname
 	print("artikel eingeben (ende als Artikelname für Eingabeende")
 	while True:
 		name = input("Artikel: ")
 		if name == "ende":
 			break
-		searchArticel(name, store)
+		searchArticel(name, store, ledger, pruchasedate, scanname)
 
-
-	
-	
-
-
-
-
-
-	
 
 	
 
@@ -295,9 +385,13 @@ def add_purchase():
 if __name__ == "__main__":
 	console = Console()
 	cat = Categorys()
-	quant = Quantitiys()
 	cat.read()
+	quant = Quantitiys()
 	quant.read()
+	purchase = Purchase()
+	nl = Ledger()
+	ns = Store()
+
 	
 
 	while True:
