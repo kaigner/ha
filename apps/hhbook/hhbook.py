@@ -42,10 +42,10 @@ else:
 
 class Purchase():
 	def __init__(self):
-		self.ledger = None
-		self.store = None
 		self.date = None
 		self.referencename = None
+		self.ledger = {"id": None, "name": None} 
+		self.store  = {"id": None, "name": None, "street": None, "housenumber": None} 
 
 class Store():
 	def __init__(self):
@@ -91,36 +91,51 @@ class Store():
 					cur.execute("SELECT id, name, alias, street, housenumber,zip FROM store where id = %s", (id,))
 					rows = cur.fetchall()
 
+				printHeader()
+				print("[green]Auswahl des Geschäftes:[/green]\n")
 				for row in rows:
-					print(row)	
+					print("{} -> {}  Alias: {}".format(row[0], row[1], row[2]))	
 		finally:
 			cur.close()
 		
 		if ask == "yes":
 			x = input("Enter für weiter")
 
-	def choise(self):
-		print("")
-		x = input("Geschäft wählen: ")
-		return x
+	def choose(self):
+		print("\n[magenta bold]Auswahl:[/magenta bold]", end="")
+		x = input(" ")
+		# simple Eingebaprüfung / SQL Injection Check - NACHARBEITEN 
+		try: 
+			val = int(x)
+		except ValueError:
+			print("Keine Zahl, Abbruch")
+			sys.exit(1)
+		
+		try:
+			with db.cursor() as cur:
+				cur.execute("SELECT id, name, street, housenumber FROM store WHERE id = %s", (x,))
+				row = cur.fetchone()
+				purchase.store["id"] = int(row[0])
+				purchase.store["name"] = row[1]
+				purchase.store["street"] = row[2]
+				purchase.store["housenumber"] = row[3]
+		finally:
+			cur.close()
+
 
 
 class Ledger():
 	def __init__(self):
 		self.account = { "name":None, "iban":None }
-	
-	def list(self, ask):
+
+	def readAll():
 		try:
 			with db.cursor() as cur:
-				cur.execute("SELECT id, name, comment FROM ledger")
+				cur.execute("SELECT id, name, comment, iban FROM ledger")
 				rows = cur.fetchall()
-				for row in rows:
-					print(row)
 		finally:
 			cur.close()
-		if ask == "y":
-			x = input("Enter für weiter")
-
+	
 	def list(self, ask, id):
 			try:
 				with db.cursor() as cur:
@@ -130,9 +145,11 @@ class Ledger():
 					else:
 						cur.execute("SELECT id, name, comment, iban FROM ledger where id = %s", (id,))
 						rows = cur.fetchall()
-			
+
+					printHeader()
+					print("[green]Konto Auswahl:[/green]\n")
 					for row in rows:
-						print(row)	
+						print("{} -> {}".format(row[0], row[1]))	
 			finally:
 				cur.close()
 			
@@ -141,9 +158,23 @@ class Ledger():
 
 
 	def choose(self):
-		print("")
-		x = input("konto wählen: ")
-		return x
+		print("\n[magenta bold]Auswahl:[/magenta bold]", end="")
+		x = input(" ")
+		# simple Eingebaprüfung / SQL Injection Check - NACHARBEITEN 
+		try: 
+			val = int(x)
+		except ValueError:
+			print("Keine Zahl, Abbruch")
+			sys.exit(1)
+		
+		try:
+			with db.cursor() as cur:
+				cur.execute("SELECT id, name FROM ledger WHERE id = %s", (x,))
+				row = cur.fetchone()
+				purchase.ledger["id"] = int(row[0])
+				purchase.ledger["name"] = row[1]
+		finally:
+			cur.close()
 
 
 class Categorys():
@@ -206,7 +237,8 @@ def add_newstore():
 		print("add to db")
 		ns.addtoDB()
 
-def addItemtoDB(name, store, ledger, pruchasedate, scanname):
+
+def addProducttoDB(name, store, ledger, pruchasedate, scanname):
 	print("Name: {}".format(name))
 	print("EAN", end="")
 	ean = input(": ").strip()
@@ -219,14 +251,13 @@ def addItemtoDB(name, store, ledger, pruchasedate, scanname):
 	packagingunit = input(": ")
 	try:
 		with db.cursor() as cur:
-			sql = "INSERT INTO item (name, ean, vendor, packing, packagingunit) VALUES (%s, %s, %s, %s, %s)"
+			sql = "INSERT INTO product (name, ean, vendor, packing, packagingunit) VALUES (%s, %s, %s, %s, %s)"
 			cur.execute(sql,(name, ean, manufactor, packaging, packagingunit ))
 			db.commit()
 
 	finally:
 		cur.close()
 	searchArticel(name , store, ledger, pruchasedate, scanname)
-
 
 
 def searchArticel(name, store, ledger, pruchasedate, scanname):
@@ -318,7 +349,6 @@ def searchArticel(name, store, ledger, pruchasedate, scanname):
 		cur.close()
 
 
-
 def addPurchaseToDB(pruchasedate, scanname, store, ledger, name, stueck, kprostueck, price, menge, mengeneinheit, kategorie):
 	try:
 		with db.cursor() as cur:
@@ -344,14 +374,21 @@ def addPurchaseToDB(pruchasedate, scanname, store, ledger, name, stueck, kprostu
 
 def add_purchase():
 	dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	
+	# Kontowahl
 	nl.list("n",0)
-	ledger = nl.choose()
-	purchase.ledger = ledger
-	print("Konto Nr: {}".format(ledger))
+	nl.choose()
+	printHeader()
+	
+	# Wahl des Geschäftes
 	ns.list("n", 0)
-	store = ns.choise()
-	purchase.store = store
-	print("Store: {}".format(store))
+	ns.choose()
+	printHeader()
+	
+	
+	sys.exit(9)
+	
+	
 	console.clear()
 	print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
 	print("\n\n")
@@ -376,10 +413,29 @@ def add_purchase():
 			break
 		searchArticel(name, store, ledger, pruchasedate, scanname)
 
-
-	
-
 	x = input("Einkauf Ende")
+
+def printHeader():
+	console.clear() 
+	print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
+	print("\n\n")
+	if purchase.ledger["name"] is None:
+		print("Konto: - leer -", end="")
+	else:
+		print("Konto: [sky_blue2]{}[/sky_blue2]".format(purchase.ledger["name"]), end="")
+	
+	print("  //  ", end="")
+
+	if purchase.store["name"] is None:
+		print("Geschäft: - leer -")
+	else:
+		print("Geschäft: [sky_blue2]{} {} {}[/sky_blue2]".format(purchase.store["name"], purchase.store["street"], purchase.store["housenumber"]))
+	
+	
+	
+	
+	# print("(Konto: {} - Geschäft: {})".format(purchase.ledger, purchase.store))
+	print("\n\n")
 
 
 if __name__ == "__main__":
@@ -395,9 +451,10 @@ if __name__ == "__main__":
 	
 
 	while True:
-		console.clear() 
-		print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
-		print("\n\n")
+		# console.clear() 
+		# print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
+		# print("\n\n")
+		printHeader()
 		print("[blue][bold]n[/bold], neuer Einkauf[/blue]")
 		print("einlauf anzeigen")
 		print("\n\n\n")
