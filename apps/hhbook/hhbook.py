@@ -371,6 +371,23 @@ def addPurchaseToDB(pruchasedate, scanname, store, ledger, name, stueck, kprostu
 		cur.close()
 
 
+def askDate():	# Datum
+	while True:
+		try:
+			# dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+			print("Einkaufsdatum ({})".format(dt), end="")
+			purchasedate = input(": ").strip()
+			if purchasedate == "":
+				purchasedate = dt
+			datetime.strptime(purchasedate, '%Y-%m-%d %H:%M:%S')
+		except ValueError:
+			continue
+		else:
+			purchase.date = purchasedate
+			break
+
+	
+
 
 def add_purchase():
 	dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -384,29 +401,28 @@ def add_purchase():
 	ns.list("n", 0)
 	ns.choose()
 	printHeader()
+
+
+    # Nach Datum Fragen
+	askDate()
+	printHeader()
 	
-	
-	sys.exit(9)
-	
-	
-	console.clear()
-	print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
-	print("\n\n")
-	print("Ausgewähltes Konto: ")
-	nl.list("no", ledger)
-	# print("\n")
-	print("Ausgewählter Laden:")
-	ns.list("no", store)
-	print("Einkaufsdatum ({})".format(dt), end="")
-	pruchasedate = input(": ").strip()
-	if pruchasedate == "":
-		pruchasedate = dt
-	# Prüfung ob es ein Dagum ist das in die Datenbank passt
-	purchase.date = dt
+	# Beleg
 	print("Dateiname des Belegs", end="")
-	scanname = input(": ")
-	purchase.referencename = scanname
+	purchase.referencename = input(": ")
+	printHeader()
+	
+	
+	
+	
+	
 	print("artikel eingeben (ende als Artikelname für Eingabeende")
+	
+
+
+
+
+
 	while True:
 		name = input("Artikel: ")
 		if name == "ende":
@@ -418,18 +434,29 @@ def add_purchase():
 def printHeader():
 	console.clear() 
 	print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
-	print("\n\n")
+	print("\n")
 	if purchase.ledger["name"] is None:
-		print("Konto: - leer -", end="")
+		print("Konto    : - leer -")
 	else:
-		print("Konto: [sky_blue2]{}[/sky_blue2]".format(purchase.ledger["name"]), end="")
-	
-	print("  //  ", end="")
+		print("Konto    : [sky_blue2]{}[/sky_blue2]".format(purchase.ledger["name"]))
 
 	if purchase.store["name"] is None:
-		print("Geschäft: - leer -")
+		print("Geschäft : - leer -")
 	else:
-		print("Geschäft: [sky_blue2]{} {} {}[/sky_blue2]".format(purchase.store["name"], purchase.store["street"], purchase.store["housenumber"]))
+		print("Geschäft : [sky_blue2]{} {} {}[/sky_blue2]".format(purchase.store["name"], purchase.store["street"], purchase.store["housenumber"]))
+	
+	if purchase.date is None:
+		print("Datum    : - leer -")
+	else:
+		print("Datum    : {}".format(str(purchase.date)))
+
+	if purchase.referencename is None:
+		print("Belegname: - leer -")
+	else:
+		print("Belegname: {}".format(purchase.referencename))
+	
+	print("\n----------------------------------------------------------\n")
+
 	
 	
 	
