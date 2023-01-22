@@ -260,91 +260,24 @@ def addProducttoDB(name, store, ledger, pruchasedate, scanname):
 	searchArticel(name , store, ledger, pruchasedate, scanname)
 
 
-def searchArticel(name, store, ledger, pruchasedate, scanname):
-	print("searchArticel")
+def searchProduct(name):
 	try:
 		with db.cursor() as cur:
-			# Suche in Einkäufen in dem Geschäft
-			storeproductmatch = False
-			itemmatch = False
-			cur.execute("select id, item, price from purchase where item like %s", (name,))
+			# Suche Produkt in Produkt DB
+			# cur.execute("select id, item, price from purchase where item like %s", (name,))
+			cur.execute("SELECT product_id, name, ean, vendor, packing, packagingunit FROM product")
 			rows = cur.fetchall()
-			storeproductmatch = True
 			if len(rows) == 0:
-				# suche in der Artikeltabelle (item)
-				cur.execute("SELECT id, name, vendor, packing FROM item WHERE name LIKE %s", (name))
-				rows = cur.fetchall()
-				itemmatch = True
+				print("Kein Produkt gefunden! - neu anlegen oder neue suche?")
 
-			if len(rows) == 0:
-				print("Keine bisherigen Einträge gefunden, Artikel wird neu eingetragen")
-				addItemtoDB(name, store, ledger, pruchasedate, scanname)
-
-
-
-
-				# while True:
-				# 	print("Stück            ", end="")
-				# 	stueck = input(": ")
-				# 	print("Kosten pro Stueck", end="")
-				# 	kprostueck = input(": ").replace(",",".")
-				# 	if kprostueck != "":
-				# 		price = float(kprostueck) * float(stueck)
-				# 		print("Kostet       : {}".format(str(price)))
-				# 	else:
-				# 		print("Kostet       ", end="")
-				# 		price = input(": ")
-					
-				# 	print("Menge (Inhalt)   ", end="")
-				# 	menge = input(": ")
-				# 	quant.list()
-				# 	print("Mengen-Einheit   ", end="")
-				# 	mengeneinheit = input(": ")
-				# 	cat.list()
-				# 	print("Kategorie        ", end="")
-				# 	kategorie = input(": ")
-				# 	addPurchaseToDB(pruchasedate, scanname, store, ledger, name, stueck, kprostueck, price, menge, mengeneinheit, kategorie)
-
-					#break
 			else:
-				print("such ergebniss:")
-				if itemmatch:
-					print("Gefunden aber nicht in dem Laden")
-				elif storeproductmatch:
-					print("schon mal gekauft hier")
 				for row in rows:
 					print(row)
 
-				print("Artikel", end="")
-				item = input(": ")
-				print("Stück            ", end="")
-				stueck = input(": ")
-				
-				print("Kosten pro Stueck", end="")
-				kprostueck = input(": ").replace(",",".")
-				if kprostueck != "":
-					price = float(kprostueck) * float(stueck)
-					print("Kostet       : {}".format(str(price)))
-				else:
-					print("Kostet       ", end="")
-					price = input(": ")
-				
-				print("Menge (Inhalt)   ", end="")
-				menge = input(": ")
-				quant.list()
-				print("Mengen-Einheit   ", end="")
-				mengeneinheit = input(": ")
-				cat.list()
-				print("Kategorie        ", end="")
-				kategorie = input(": ")
 
-				print("ledger {} store {} date {} name {}".format(purchase.ledger, purchase.store, purchase.date, purchase.referencename))
-				addPurchaseToDB(purchase.date, purchase.referencename, purchase.store, purchase.ledger, item, stueck, kprostueck, price, menge, mengeneinheit, kategorie) # 11
-
-
-
-				# Neustart mit dem Ergebnis
-				sys.exit(1)
+			# Neustart mit dem Ergebnis
+			print("ende")
+			sys.exit(1)
 	finally:
 		cur.close()
 
@@ -388,7 +321,6 @@ def askDate():	# Datum
 
 	
 
-
 def add_purchase():
 	dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	
@@ -413,22 +345,33 @@ def add_purchase():
 	printHeader()
 	
 	
+	# ###################
+	# Eingabe der Artikel
+	# ###################
+	# 
+	# 		
+	print('Artikel eingeben ("ende" als Artikelname für Eingabeende')
 	
-	
-	
-	print("artikel eingeben (ende als Artikelname für Eingabeende")
-	
-
-
-
-
-
 	while True:
 		name = input("Artikel: ")
 		if name == "ende":
 			break
-		searchArticel(name, store, ledger, pruchasedate, scanname)
+		# Artikel schon in der Datenbank?
+		searchProduct(name)
+		
 
+		
+		
+		
+		# ALT searchArticel(name, store, ledger, pruchasedate, scanname)
+
+	
+	
+	
+	
+	
+	
+	
 	x = input("Einkauf Ende")
 
 def printHeader():
