@@ -71,6 +71,33 @@ class Store():
 			else:
 				print('Bitte "ja" oder "nein" eingeben, Danke! :)', ":nerd_face:")
 
+class Product():
+	def __init__(self):
+		self.product = {"name": None, "ean": None, "vendor": None, "packing": None, "packagingunit": None }
+
+	def addProduct(self, name):
+		console.clear()
+		self.product["name"]          = input("Name des Produktes : ").strip()
+		self.product["ean"]           = input("EAN                : ").strip()
+		self.product["vendor"]        = input("Hersteller         : ").strip()
+		self.product["packing"]       = input("Verpackung         : ").strip() #VERPAKUNGEN AUFLISTEN
+		self.product["packagingunit"] = input("Verpackungs-Einheit: ").strip()
+		try:
+			with db.cursor() as cur:
+				sql = "INSERT INTO product (name, ean, vendor, packing, packagingunit) VALUES (%s, %s, %s, %s, %s)"
+				cursor.execute(sql,(self.product["name"], self.product["ean"], self.product["vendor"], self.product["packing"], self.product["packagingunit"]))
+				db.commit()
+		finally:
+			cur.close()
+
+
+		
+		
+		
+		
+		sys.exit(9)
+
+
 	def addtoDB(self):
 		print("Add Store to DB")
 		dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -80,6 +107,7 @@ class Store():
 		db.commit()
 		cursor.close
 		print("\n\n[italic green]Geschädt angelegt[/italic green]")
+
 
 	def list(self, ask, id):
 		try:
@@ -100,6 +128,7 @@ class Store():
 		
 		if ask == "yes":
 			x = input("Enter für weiter")
+
 
 	def choose(self):
 		print("\n[magenta bold]Auswahl:[/magenta bold]", end="")
@@ -257,7 +286,12 @@ def addProducttoDB(name, store, ledger, pruchasedate, scanname):
 
 	finally:
 		cur.close()
-	searchArticel(name , store, ledger, pruchasedate, scanname)
+	# searchArticel(name , store, ledger, pruchasedate, scanname)
+
+def addProduct(name):
+	printHeader()
+	print("Produktname: {}".format(name))
+	print("Hersteller")
 
 
 def searchProduct(name):
@@ -268,7 +302,9 @@ def searchProduct(name):
 			cur.execute("SELECT product_id, name, ean, vendor, packing, packagingunit FROM product")
 			rows = cur.fetchall()
 			if len(rows) == 0:
-				print("Kein Produkt gefunden! - neu anlegen oder neue suche?")
+				print("Kein Produkt gefunden! - neu anlegen oder neue suche? (default neu, derzeit einzige option")
+				x = input("Enter um Produkt anzulegen")
+				product.addProduct(name)
 
 			else:
 				for row in rows:
@@ -320,7 +356,6 @@ def askDate():	# Datum
 			break
 
 	
-
 def add_purchase():
 	dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	
@@ -412,6 +447,7 @@ if __name__ == "__main__":
 	console = Console()
 	cat = Categorys()
 	cat.read()
+	product = Product()
 	quant = Quantitiys()
 	quant.read()
 	purchase = Purchase()
