@@ -112,6 +112,23 @@ class Store():
 			cur.close()
 
 
+class PackagingUnit():
+	def __init__(self):
+		self.pu_name = {"pu_id": None, "name": None, "shortname": None, "comment": None}
+
+	def readFromDB(self):
+		try:
+			with db.cursor() as cur:
+				cur.execute("select pu_id, name, shortname, comment from packagingunit")
+				rows = cur.fetchall()
+				for row in rows:
+					print(row)
+		finally:
+			cur.close()
+
+
+
+
 class Product():
 	def __init__(self):
 		self.product = {"name": None, "ean": None, "vendor": None, "packing": None, "packagingunit": None }
@@ -273,7 +290,7 @@ class Quantitiys():
 	def read(self):
 		try:
 			with db.cursor() as cur:
-				cur.execute("select id, name from quantitys")
+				cur.execute("select id, name from packaging")
 				rows = cur.fetchall()
 				for id, name in rows:
 					self.quantity[id]=name
@@ -494,6 +511,10 @@ if __name__ == "__main__":
 	purchase = Purchase()
 	nl = Ledger()
 	ns = Store()
+
+	pu = PackagingUnit()
+	pu.readFromDB()
+	sys.exit
 
 	
 
