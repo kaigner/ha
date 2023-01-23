@@ -71,6 +71,47 @@ class Store():
 			else:
 				print('Bitte "ja" oder "nein" eingeben, Danke! :)', ":nerd_face:")
 
+	def list(self, ask, id):
+		try:
+			with db.cursor() as cur:
+					if id == 0:
+							cur.execute("SELECT id, name, alias, street, housenumber,zip FROM store")
+							rows = cur.fetchall()
+					else:
+							cur.execute("SELECT id, name, alias, street, housenumber,zip FROM store where id = %s", (id,))
+							rows = cur.fetchall()
+					printHeader()
+					print("[green]Auswahl des Geschäftes:[/green]\n")
+					for row in rows:
+						print("{} -> {}  Alias: {}".format(row[0], row[1], row[2]))
+		finally:
+			cur.close()
+
+			if ask == "yes":
+					x = input("Enter für weiter")
+
+	def choose(self):
+		print("\n[magenta bold]Auswahl:[/magenta bold]", end="")
+		x = input(" ")
+		# simple Eingebaprüfung / SQL Injection Check - NACHARBEITEN
+		try:
+			val = int(x)
+		except ValueError:
+			print("Keine Zahl, Abbruch")
+			sys.exit(1)
+
+		try:
+				with db.cursor() as cur:
+						cur.execute("SELECT id, name, street, housenumber FROM store WHERE id = %s", (x,))
+						row = cur.fetchone()
+						purchase.store["id"] = int(row[0])
+						purchase.store["name"] = row[1]
+						purchase.store["street"] = row[2]
+						purchase.store["housenumber"] = row[3]
+		finally:
+			cur.close()
+
+
 class Product():
 	def __init__(self):
 		self.product = {"name": None, "ean": None, "vendor": None, "packing": None, "packagingunit": None }
