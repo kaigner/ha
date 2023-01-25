@@ -283,14 +283,14 @@ class Categorys():
 			print("Id: {}  Name: {}".format(id, name))
 
 
-class Quantitiys():
+class Packaging():
 	def __init__(self):
 		self.quantity = {}
 	
 	def read(self):
 		try:
 			with db.cursor() as cur:
-				cur.execute("select id, name from packaging")
+				cur.execute("select pa_id, name from packaging")
 				rows = cur.fetchall()
 				for id, name in rows:
 					self.quantity[id]=name
@@ -506,7 +506,7 @@ if __name__ == "__main__":
 	cat = Categorys()
 	cat.read()
 	product = Product()
-	quant = Quantitiys()
+	quant = Packaging()
 	quant.read()
 	purchase = Purchase()
 	nl = Ledger()
