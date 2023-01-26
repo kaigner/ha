@@ -247,6 +247,8 @@ class Ledger():
 	def choose(self):
 		print("\n[magenta bold]Auswahl:[/magenta bold]", end="")
 		x = input(" ")
+		if x == "":
+			x = 1
 		# simple Eingebaprüfung / SQL Injection Check - NACHARBEITEN 
 		try: 
 			val = int(x)
