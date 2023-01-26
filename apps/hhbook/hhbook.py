@@ -325,31 +325,49 @@ def add_newstore():
 		ns.addtoDB()
 
 
-def addProducttoDB(name, store, ledger, pruchasedate, scanname):
-	print("Name: {}".format(name))
+# def addProducttoDB(name, store, ledger, pruchasedate, scanname):
+# 	print("Name: {}".format(name))
+# 	print("EAN", end="")
+# 	ean = input(": ").strip()
+# 	print("Hersteller", end="")
+# 	manufactor = input(": ").strip()
+# 	print("Verpackung", end="")
+# 	packaging = input(": ").strip()
+# 	print("Verpackungseinheit", end="")
+# 	quant.list()
+# 	packagingunit = input(": ")
+# 	try:
+# 		with db.cursor() as cur:
+# 			sql = "INSERT INTO product (name, ean, vendor, packing, packagingunit) VALUES (%s, %s, %s, %s, %s)"
+# 			cur.execute(sql,(name, ean, manufactor, packaging, packagingunit ))
+# 			db.commit()
+
+# 	finally:
+# 		cur.close()
+# 	# searchArticel(name , store, ledger, pruchasedate, scanname)
+
+def addProduct(name):
+	printHeader()
+	print("Name {}".format(name), end="")
+	t_name = input(": ").strip()
+	if t_name != "":
+		name = t_name
 	print("EAN", end="")
 	ean = input(": ").strip()
 	print("Hersteller", end="")
 	manufactor = input(": ").strip()
+	
 	print("Verpackung", end="")
+	
+	
+	
+	
 	packaging = input(": ").strip()
+	
+	
 	print("Verpackungseinheit", end="")
 	quant.list()
 	packagingunit = input(": ")
-	try:
-		with db.cursor() as cur:
-			sql = "INSERT INTO product (name, ean, vendor, packing, packagingunit) VALUES (%s, %s, %s, %s, %s)"
-			cur.execute(sql,(name, ean, manufactor, packaging, packagingunit ))
-			db.commit()
-
-	finally:
-		cur.close()
-	# searchArticel(name , store, ledger, pruchasedate, scanname)
-
-def addProduct(name):
-	printHeader()
-	print("Produktname: {}".format(name))
-	print("Hersteller")
 
 
 def searchProduct(name):
@@ -357,7 +375,7 @@ def searchProduct(name):
 		with db.cursor() as cur:
 			# Suche Produkt in Produkt DB
 			# cur.execute("select id, item, price from purchase where item like %s", (name,))
-			cur.execute("SELECT product_id, name, ean, vendor, packing, packagingunit FROM product")
+			cur.execute("SELECT product_id, name, ean, vendor, packing, packagingunit FROM product where name like %s", (name,))
 			rows = cur.fetchall()
 			if len(rows) == 0:
 				print("Kein Produkt gefunden! - neu anlegen oder neue suche? (default neu, derzeit einzige option")
@@ -365,8 +383,10 @@ def searchProduct(name):
 				product.addProduct(name)
 
 			else:
+				print("gefundene Produkte:")
 				for row in rows:
 					print(row)
+				return True
 
 
 			# Neustart mit dem Ergebnis
