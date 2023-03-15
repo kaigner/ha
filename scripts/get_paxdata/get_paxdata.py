@@ -1,4 +1,4 @@
-#!/usr/bin/python3.8
+#!/usr/bin/python3
 
 import json
 import os, sys
@@ -45,7 +45,7 @@ def addDataToDB(wifi, ble, gwname, gweui, freq, freqts, location):
 
 
 def on_connect(mqttc, mosq, obj,rc):
-    print("Connected with result code:"+str(rc))
+    print("MQTT Connected with result code:"+str(rc))
     # subscribe for all devices of user
     mqttc.subscribe('v3/paxcounter-munich-ea@ttn/devices/pax-counter-test-app-munich/#')
 
