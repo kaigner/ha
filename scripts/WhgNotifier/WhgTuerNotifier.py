@@ -49,7 +49,7 @@ client.subscribe("smarthome/Wohnungstuer/lock_status")
 client.on_message=on_message
 
 # Read Config File
-with open("lock_status.cfg") as json_config_file:
+with open("lock_statuscfg.json") as json_config_file:
         config_data=json.load(json_config_file)
 db_host = config_data['mysql']['host']
 db_user = config_data['mysql']['user']
