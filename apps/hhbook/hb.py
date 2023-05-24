@@ -5,15 +5,17 @@ import json
 import pymysql
 import pytz
 import os
+from rich import print
+from rich.console import Console
 import sys
 
 
-# Lese Konfig 
+# Lese Konfig
 os.chdir(os.path.dirname(__file__))
 
 # Read Config File
 with open(os.getcwd() + "/config.json") as json_config_file:
-	config_data=json.load(json_config_file)
+    config_data = json.load(json_config_file)
 db_host = config_data['mysql']['host']
 db_user = config_data['mysql']['user']
 db_pass = config_data['mysql']['pass']
@@ -23,18 +25,20 @@ dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Connect to Database
 try:
-	db = pymysql.connect(host=db_host, user=db_user, password=db_pass, database=db_name)
+    db = pymysql.connect(host=db_host, user=db_user, password=db_pass,
+                         database=db_name)
 except pymysql.err.OperationalError as error:
-	print("- error connecting to database: {}".format(error))
-	pass
+    print("- error connecting to database: {}".format(error))
+    pass
 
 cursor = db.cursor()
 if (db):
-	print("Datenbankverbindung OK")
-	# pass #print("Datenbankverbindung OK")
+    print("Datenbankverbindung OK")
+    # pass #print("Datenbankverbindung OK")
 else:
-	print("konnte keine Verbindung zur Datenbank herstellen")
-	sys.exit(9)
+    print("konnte keine Verbindung zur Datenbank herstellen")
+    sys.exit(9)
+
 
 class receipt:
     def __init__(self):
@@ -63,12 +67,19 @@ class Store():
         self.state = "Bayern"
         self.country = "Deutschland"
 
+class Purchase():
+	def __init__(self):
+		self.date = None
+		self.referencename = None
+		self.ledger = {"id": None, "name": None} 
+		self.store  = {"id": None, "name": None, "street": None, "housenumber": None} 
 
 class Ledger():
     def __init__(self):
         self.account = {"name": None, "iban": None}
 
     def readAll():
+        print("start l.readAll")
         try:
             with db.cursor() as cur:
                 cur.execute("SELECT id, name, comment, iban FROM ledger")
@@ -76,7 +87,7 @@ class Ledger():
         finally:
             cur.close()
 
-    def list(self, ask, id):
+    def xlist(self, ask, id):
         try:
             with db.cursor() as cur:
                 if id == 0:
@@ -119,5 +130,44 @@ class Ledger():
             cur.close()
 
 
-print(sys.version_info)
-print(datetime.now())
+def printHeader():
+    console.clear()
+    print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
+    print("\n")
+    if purchase.ledger["name"] is None:
+        print("Konto    : - leer -")
+    else:
+        print(
+            "Konto    : [sky_blue2]{}[/sky_blue2]".format(purchase.ledger["name"]))
+
+    if purchase.store["name"] is None:
+        print("Geschäft : - leer -")
+    else:
+        print("Geschäft : [sky_blue2]{} {} {}[/sky_blue2]".format(
+            purchase.store["name"], purchase.store["street"], purchase.store["housenumber"]))
+
+    if purchase.date is None:
+        print("Datum    : - leer -")
+    else:
+        print("Datum    : {}".format(str(purchase.date)))
+
+    if purchase.referencename is None:
+        print("Belegname: - leer -")
+    else:
+        print("Belegname: {}".format(purchase.referencename))
+
+    print("\n----------------------------------------------------------\n")
+
+
+
+if __name__ == "__main__":
+    console = Console()
+    bank_account = Ledger()
+    purchase = Purchase()
+    printHeader()
+
+
+
+
+
+
