@@ -133,7 +133,7 @@ class Ledger():
             cur.close()
 
 
-def hhbook_exit():
+def hb_exit():
     db.close()
     sys.exit(1)
 
