@@ -67,12 +67,15 @@ class Store():
         self.state = "Bayern"
         self.country = "Deutschland"
 
+
 class Purchase():
-	def __init__(self):
-		self.date = None
-		self.referencename = None
-		self.ledger = {"id": None, "name": None} 
-		self.store  = {"id": None, "name": None, "street": None, "housenumber": None} 
+    def __init__(self):
+        self.date = None
+        self.referencename = None
+        self.ledger = {"id": None, "name": None}
+        self.store = {"id": None, "name": None,
+                      "street": None, "housenumber": None}
+
 
 class Ledger():
     def __init__(self):
@@ -130,6 +133,11 @@ class Ledger():
             cur.close()
 
 
+def hhbook_exit():
+    db.close()
+    sys.exit(1)
+
+
 def printHeader():
     console.clear()
     print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
@@ -159,15 +167,40 @@ def printHeader():
     print("\n----------------------------------------------------------\n")
 
 
-
 if __name__ == "__main__":
     console = Console()
     bank_account = Ledger()
     purchase = Purchase()
     printHeader()
 
+    while True:
+        # console.clear()
+        # print("[yellow underline]\nHaushaltsbuch v0.0.1a[/yellow underline]")
+        # print("\n\n")
+        printHeader()
+        print("[blue][bold]n[/bold], neuer Einkauf[/blue]")
+        print("einlauf anzeigen")
+        print("\n\n\n")
+        print("1, neues Geschäft anlegen")
+        print("2, Geschäfte anzeigen")
+        print("\n----------------------\n")
+        print("3, neues Konto anlegen")
+        print("4, Konten auflisten")
+        print("\n\n")
+        print("x, Beenden")
 
+        x = input("Auswahl: ").strip()
 
+        print("\nEingabe: {}".format(x))
 
-
-
+        if x == "x":
+            hb_exit()
+        elif x == "n":
+            add_purchase()
+        elif x == "1":
+            add_newstore()
+        elif x == "2":
+            list_stores()
+        else:
+            pass
+        # x = input("neuer lauf")
