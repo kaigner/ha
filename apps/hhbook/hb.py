@@ -29,7 +29,7 @@ try:
                          database=db_name)
 except pymysql.err.OperationalError as error:
     print("- error connecting to database: {}".format(error))
-    pass
+    sys.exit(1)
 
 cursor = db.cursor()
 if (db):
@@ -112,17 +112,17 @@ class Ledger():
             x = input("Enter für weiter")
 
     def choose(self):
-        print("\n[magenta bold]Auswahl:[/magenta bold]", end="")
-        x = input(" ")
-        if x == "":
-            x = 1
-        # simple Eingebaprüfung / SQL Injection Check - NACHARBEITEN
         try:
-            val = int(x)
-        except ValueError:
-            print("Keine Zahl, Abbruch")
-            sys.exit(1)
+            with db.cursor() as cur:
+                cur.execute("SELECT id, name, comment, iban FROM ledger")
+                rows = cur.fetchall()
+        finally:
+            cur.close()
+        for row in rows:
+            print("Idx:{} -> {}".format(row[0], row[1]))
 
+        print("\n[magenta bold]Auswahl:[/magenta bold]", end="")
+        x = get_number_input(0, int(len(rows)))
         try:
             with db.cursor() as cur:
                 cur.execute("SELECT id, name FROM ledger WHERE id = %s", (x,))
@@ -130,7 +130,21 @@ class Ledger():
                 purchase.ledger["id"] = int(row[0])
                 purchase.ledger["name"] = row[1]
         finally:
-            cur.close()
+            pass
+
+
+
+def get_number_input(n, x):
+    while True:
+        user_input = input()
+        if user_input.isdigit():
+            number = int(user_input)
+            if n <= number <= x:
+                return number
+            else:
+                print("Bitte geben Sie eine Zahl zwischen {} und {} ein: ".format(n, x))
+        else:
+            print("Bitte geben Sie eine Zahl zwischen {} und {} ein: ".format(n, x))
 
 
 def hb_exit():
@@ -185,7 +199,7 @@ if __name__ == "__main__":
         print("2, Geschäfte anzeigen")
         print("\n----------------------\n")
         print("3, neues Konto anlegen")
-        print("4, Konten auflisten")
+        print("4, Konto Auswählen")
         print("\n\n")
         print("x, Beenden")
 
@@ -201,6 +215,8 @@ if __name__ == "__main__":
             add_newstore()
         elif x == "2":
             list_stores()
+        elif x == "4":
+            bank_account.choose()
         else:
             pass
         # x = input("neuer lauf")
