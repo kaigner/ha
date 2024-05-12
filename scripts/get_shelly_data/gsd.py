@@ -76,7 +76,7 @@ if __name__ == "__main__":
                 # parse_json_and_do_the_rest_because_i_have_no_class(json_data)
                 insert_json_data_to_database(json_data, aliasname)
             json_data = {}
-        time.sleep(60)
+        time.sleep(300)
 
 
 sys.exit(0)
