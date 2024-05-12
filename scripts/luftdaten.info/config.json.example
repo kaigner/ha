@@ -1,0 +1,23 @@
+{
+    "postgres":{
+        "host":"10.8.0.1",
+        "user":"postgres-user",
+	    "pass":"password :)",
+        "db":"postgres-database"
+    },
+    "mysql":{
+        "host":"333.444.555.666",
+        "user":"superuser",
+	    "pass":"bla bla",
+        "db":"e2d2"
+    },
+    "sensor":{
+        "type":"sds011",
+        "location":"sallach_weiher",
+        "alias":"feinstaub",
+        "vendor":"Airrohr",
+        "ip":"111.222.333.444",
+        "readings":["SDS_P1","SDS_P2","BME280_temperature","BME280_pressure","BME280_humidity","samples","min_micro","max_micro","interval","signal"],
+        "sensors": ["SDS011", "BME480"]
+    }
+}

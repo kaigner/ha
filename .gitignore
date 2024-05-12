@@ -1,0 +1,5 @@
+*.idea
+*.swp
+config.json
+lock_statuscfg.json
+scripts/get_shelly_data/gsd-prom.py

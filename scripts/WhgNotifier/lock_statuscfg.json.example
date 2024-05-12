@@ -1,0 +1,13 @@
+{
+    "mysql":{
+        "host":"10.8.0.1",
+        "user":"username",
+        "pass":"pass",
+        "db":"dbname",
+	      "port":3306
+    },
+    "pushover":{
+    "token":"app token",
+    "user":"user / group ID"
+  }
+}
