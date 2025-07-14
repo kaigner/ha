@@ -3,3 +3,7 @@
 config.json
 lock_statuscfg.json
 scripts/get_shelly_data/gsd-prom.py
+
+scripts/luftdaten.info/config-psql-muc.json
+scripts/luftdaten.info/config-psql-sallach.json
+scripts/luftdaten.info/config-sallach.json
