@@ -11,6 +11,11 @@ import pymysql
 
 
 def on_message(client, userdata, message):
+    # Open connection to DB
+    conn = pymysql.connect(
+        database=db_name, user=db_user, password=db_pass, host=db_host, port=db_port
+    )
+    cur = conn.cursor()
 
     msg = str(message.payload.decode("utf-8"))
     dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -41,6 +46,7 @@ def on_message(client, userdata, message):
         print("unbekannte Nachricht: " + msg)
         send_po("Teste PO Nachricht" + msg)
     conn.commit()
+    conn.close()
 
 
 def send_po(po_msg):
@@ -78,11 +84,6 @@ db_port = config_data["mysql"]["port"]
 po_token = config_data["pushover"]["token"]
 po_user = config_data["pushover"]["user"]
 
-# Open connection to DB
-conn = pymysql.connect(
-    database=db_name, user=db_user, password=db_pass, host=db_host, port=db_port
-)
-cur = conn.cursor()
 
 while True:
     client.loop_start()
