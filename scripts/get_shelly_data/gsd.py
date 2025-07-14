@@ -25,11 +25,63 @@ db_name = config_data["mysql"]["db"]
 
 
 shellys = {
-    "192.168.2.21": "shelly_plug_s_spuelmaschine",
     "192.168.2.22": "shelly_plug_s_ap_klaus",
     "192.168.2.23": "shelly_plug_s_ap_claudia",
-    "192.168.2.24": "shelly_plug_s_bad",
 }
+
+xshellys = {
+    "192.168.2.21": "shelly_plug_s_ap_spuelmaschine",
+    "192.168.2.22": "shelly_plug_s_ap_klaus",
+    "192.168.2.23": "shelly_plug_s_ap_claudia",
+    "192.168.2.25": "shelly_plus_1pm_bad",
+    "192.168.178.171": "shelly_plug_s_ham_icom",
+    "192.168.178.172": "shelly_plug_s_ham_laprtop",
+}
+
+def yyget_status_in_json(ipaddr):
+    endpoints = [
+        "/status",  # Shelly Gen1
+        "/rpc/Shelly.GetStatus",  # Shelly Gen2
+        "/rpc/Sys.GetStatus",     # Shelly Gen2
+        "/cm?cmnd=Status%200",    # Tasmota: allgemeiner Status
+        "/cm?cmnd=Status%208"     # Tasmota: WLAN-Status
+    ]
+
+    for endpoint in endpoints:
+        try:
+            url = f"http://{ipaddr}{endpoint}"
+            response = requests.get(
+                url,
+                auth=HTTPBasicAuth(shelly_user, shelly_pass),  # Optional, falls nötig
+                timeout=3
+            )
+
+            if response.status_code == 200 and 'application/json' in response.headers.get('Content-Type', ''):
+                print(f"{ipaddr}: Erfolg mit {endpoint}")
+                return response.json()
+            else:
+                print(f"{ipaddr}: {endpoint} liefert {response.status_code}")
+        except requests.RequestException as e:
+            print(f"{ipaddr}: Fehler bei {endpoint}: {e}")
+            continue
+
+    print(f"{ipaddr}: Kein bekannter Endpunkt lieferte eine gültige Antwort.")
+    return None
+
+
+def xxget_status_in_json(ipaddr):
+    try:
+        response = requests.get(
+            f"http://{ipaddr}/status",
+            auth=HTTPBasicAuth(shelly_user, shelly_pass),
+            timeout=3
+        )
+        if response.status_code == 200 and 'application/json' in response.headers.get('Content-Type', ''):
+            return response.json()
+        else:
+            print(f"{ipaddr}: Unerwartete Antwort ({response.status_code}): {response.text[:100]}")
+    except requests.RequestException as e:
+        print(f"{ipaddr}: Fehler beim Zugriff: {e}")
 
 
 def get_status_in_json(ipaddr):
